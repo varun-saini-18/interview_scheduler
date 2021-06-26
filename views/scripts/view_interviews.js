@@ -11,7 +11,6 @@ fetch(url)
 .then(function (data) {
     var result = data.data;
     var table_data = "";
-    console.log(result)
     result.forEach(element => {
         let begin_time = moment(element[1]).format("MMMM Do YYYY, h:mm:ss a");
         let end_time = moment(element[2]).format("MMMM Do YYYY, h:mm:ss a");

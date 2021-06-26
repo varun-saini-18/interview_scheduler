@@ -35,7 +35,6 @@ fetch(url)
         document.getElementById("prev_begin_time").innerHTML = "Previous beginning time was : " + begin_time;
         document.getElementById("prev_end_time").innerHTML = "Previous ending time was : " + end_time;
 
-        console.log(begin_time, end_time);
     });
 
 

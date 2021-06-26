@@ -2,6 +2,7 @@
 
 // Fetch all interviews and then append them to table
 
+
 var url = '/get_interviews';
 fetch(url)
     .then(function (response) {
@@ -10,8 +11,12 @@ fetch(url)
 .then(function (data) {
     var result = data.data;
     var table_data = "";
+    console.log(result)
     result.forEach(element => {
-        table_data+='<table id="'+element[0]+'" style="background-color:rgb(226, 228, 146);"><thead><th>Begin Time : '+ element[1] +'</th><th>End Time : '+ element[2] +'</th><th>'+element[3]+'</th><th>Edit</th></thead><tbody></tbody></table>'
+        let begin_time = moment(element[1]).format("MMMM Do YYYY, h:mm:ss a");
+        let end_time = moment(element[2]).format("MMMM Do YYYY, h:mm:ss a");
+        let edit_url = 'http://localhost:5000/edit-interview/'+element[0];
+        table_data+='<table id="'+element[0]+'" style="background-color:rgb(226, 228, 146);"><thead><th>Begin Time : '+ begin_time +'</th><th>End Time : '+ end_time +'</th><th>'+element[3]+'</th><th><a href="'+ edit_url +'">Edit</a></th></thead><tbody></tbody></table>'
     });
     
     document.getElementById("table").innerHTML = table_data

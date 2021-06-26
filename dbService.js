@@ -1,5 +1,6 @@
 const mysql = require('mysql');
 const dotenv = require('dotenv');
+const moment = require('moment');
 let instance = null;
 dotenv.config();
 
@@ -53,6 +54,37 @@ class DbService {
 
     async setInterview(intervieews,totalBeginTime,totalEndTime) {
         try {
+            const existing_interviews = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM meets INNER JOIN all_meets ON meets.meet_id = all_meets.id WHERE meets.participant_email IN ?;";
+                connection.query(query,[[intervieews]],  (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            let existing_begin_time = [],existing_end_time=[];
+            existing_interviews.forEach(element => {
+               existing_begin_time.push(element.meet_begin);
+               existing_end_time.push(element.meet_end);
+            });
+            let conflicting_intervieews = new Set();
+            for(let index=0;index<existing_interviews.length;index++)
+            {
+                if (!(
+                    (existing_begin_time[index]>=totalBeginTime&&existing_end_time[index]>=totalEndTime)||
+                    (existing_begin_time[index]<=totalBeginTime&&existing_end_time[index]<=totalEndTime)))
+                {
+                    conflicting_intervieews.add(existing_interviews[index].participant_email);
+                }
+            }
+            if(conflicting_intervieews.size)
+            {
+                conflicting_intervieews=Array.from(conflicting_intervieews);
+               
+                return {
+                    error: 'Time slot Not Available',
+                    conflicting_intervieews : conflicting_intervieews
+                }
+            }
             const insertId = await new Promise((resolve, reject) => {
                 const query = "INSERT INTO all_meets ( meet_begin,meet_end) VALUES (?,?);";
                 connection.query(query, [totalBeginTime,totalEndTime] , (err, result) => {
@@ -79,7 +111,80 @@ class DbService {
         }
     }
 
+    async editInterview(meetId,intervieews) {
+        try {
+            const meetIdAsArray = []
+            meetIdAsArray.push(meetId);
+            const existing_interviews = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM meets INNER JOIN all_meets ON meets.meet_id = all_meets.id WHERE meets.participant_email IN ? AND meets.meet_id NOT IN ?;";
+                connection.query(query,[[intervieews],[meetIdAsArray]],  (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            let existing_begin_time = [],existing_end_time=[];
+            existing_interviews.forEach(element => {
+               existing_begin_time.push(element.meet_begin);
+               existing_end_time.push(element.meet_end);
+            });
+            for(let index=0;index<existing_interviews.length;index++)
+            {
+                if (!(
+                    (existing_begin_time[index]>=totalBeginTime&&existing_end_time[index]>=totalEndTime)||
+                    (existing_begin_time[index]<=totalBeginTime&&existing_end_time[index]<=totalEndTime)))
+                {
+                    return {
+                        error:'Time slot not available'
+                    };
+                }
+            }
+            await new Promise((resolve, reject) => {
+                const query = "BEGIN; DELETE FROM `meets` WHERE meet_id = ? ; DELETE FROM `all_meets` WHERE id = ?;COMMIT;";
+                connection.query(query, [meetId,meetId] , (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            const insertId = await new Promise((resolve, reject) => {
+                const query = "INSERT INTO all_meets ( meet_begin,meet_end) VALUES (?,?);";
+                connection.query(query, [totalBeginTime,totalEndTime] , (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result['insertId']);
+                })
+            });
+            await new Promise((resolve, reject) => {
+                const all_intervieews = [];
+                intervieews.forEach(element => {
+                    all_intervieews.push([element,insertId]);
+                });
+                const query = "INSERT INTO meets (participant_email,meet_id) VALUES ?;";
+                connection.query(query, [all_intervieews] , (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return {
+                id : insertId
+            };
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
+    async get_interview_detail(meet_id) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT * FROM meets INNER JOIN all_meets ON meets.meet_id = all_meets.id WHERE all_meets.id=?;";
+                connection.query(query,[meet_id], (err, results) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(results);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     async get_participants() {
         try {

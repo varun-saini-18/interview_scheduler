@@ -27,9 +27,11 @@ body {}
 	<h1>Edit your interviewees here</h1>
 
 	<div>
-		<a href="https://github.com/varun-saini-18/Schedule-Interviews">Github Repository Link</a>
+		<a href="https://github.com/varun-saini-18/interview_scheduler">Github Repository Link</a>
         <br>
         <a href="/show_all_interviews">Show all Interviews</a>
+        <br>
+        <a href="/">Create new interviews!</a>
 	</div>
 
 	<div class="row">
@@ -37,17 +39,22 @@ body {}
 			<h3>Multi Selection</h3>
 			<input type="text" id="justAnInputBox" placeholder="Select" autocomplete="off"/>
 		</div>
-        <div>
-            <input type="date" id="beginDate">
-            <input type="time" id="beginTime">
-            <br><br>
-            <input type="date" id="endDate">
-            <input type="time" id="endTime">
-        </div>
 	</div>
     <div>
         <br>
-        <button style="border:1" onclick="schedule()">Schedule Meeting</button>
+        <p>Begin Time :
+            <input type="date" id="beginDate">
+            <input type="time" id="beginTime">
+        </p>
+        <p> End Time :
+            <input type="date" id="endDate">
+            <input type="time" id="endTime">
+        </p>
+        
+    </div>
+    <div>
+        <br>
+        <button id="edit-schedule" style="border:1" onclick="schedule()">Edit Meeting</button>
     </div>
 </div>
 

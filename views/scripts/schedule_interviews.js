@@ -1,7 +1,7 @@
 
 // Fetch all the participants from db
 
-fetch('http://localhost:5000/get_participants')
+fetch('https://manage-interviews.herokuapp.com/get_participants')
     .then(response => response.json())
     .then(data => {
         jQuery(document).ready(function ($) {
@@ -20,6 +20,9 @@ fetch('http://localhost:5000/get_participants')
 // Function to schedule the interviews
 
 function schedule(){
+    document.getElementById("schedule-btn").innerHTML="Please Wait!!";
+    document.getElementById("schedule-btn").disabled = true;
+
     var beginDate = document.getElementById("beginDate").value;
     beginDate = beginDate.split("-");
     beginDate = new Date( beginDate[0], beginDate[1] - 1, beginDate[2]);
@@ -42,6 +45,12 @@ function schedule(){
     
     var totalBeginTime = beginDate + beginTime;
     var totalEndTime = endDate + endTime;
+
+    if(totalEndTime<totalBeginTime)
+    {
+        alert('Enter Valid Time!');
+        return;
+    }
     
     var intervieews = document.getElementById("justAnInputBox").value;
     intervieews = intervieews.split(", ");
@@ -60,7 +69,22 @@ function schedule(){
     })
     .then(response => response.json())  
     .then((data) => {
-        console.log(data);
+        if(!!data.message){
+            document.getElementById("schedule-btn").innerHTML="Schedule Again!!";
+            document.getElementById("schedule-btn").disabled = false;
+            alert(data.message);
+        }
+        else if(!!data.data.error){
+            document.getElementById("schedule-btn").innerHTML="Schedule Again!!";
+            document.getElementById("schedule-btn").disabled = false;
+            alert('error = '+ data.data.error + '. Conflicting intervieews are : ' + data.data.conflicting_intervieews);
+            
+        }
+        else{
+            alert('Successfully registered your meeting!');
+            window.location.href = "https://manage-interviews.herokuapp.com/show_all_interviews";
+        }
+        
     })
 
 }

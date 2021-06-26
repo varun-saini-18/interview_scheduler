@@ -61,9 +61,7 @@ Number of participants is less than 2 (minimum 2, no upper bound)
 
 ### Built With
  [NodeJs]    
- [Javascript]  
- [Tkinter]    
- [Python]   
+ [Javascript] 
  [Heroku]  
 
 

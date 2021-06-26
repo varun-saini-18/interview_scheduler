@@ -115,7 +115,6 @@ class DbService {
                 existing_end_time.push(element.meet_end);
             });
             let conflicting_intervieews = new Set();
-            console.log(existing_interviews)
             for (let index = 0; index < existing_interviews.length; index++) {
                 console.log(existing_begin_time[index], totalBeginTime, existing_end_time[index], totalEndTime)
                 if (!(existing_begin_time[index] >= totalEndTime || existing_end_time[index] <= totalBeginTime)) {

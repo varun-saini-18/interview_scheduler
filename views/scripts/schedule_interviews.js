@@ -1,20 +1,36 @@
 
 // Fetch all the participants from db
 
-fetch('https://manage-interviews.herokuapp.com/get_participants')
-    .then(response => response.json())
-    .then(data => {
-        jQuery(document).ready(function ($) {
-            var comboTree1, comboTree2;
-            comboTree1 = $('#justAnInputBox').comboTree({
-                source: data.data,
-                isMultiple: true,
-                cascadeSelect: false,
-                collapse: true,
-                selectableLastNode: true,
+var storedParticipants = JSON.parse(localStorage.getItem("all_participants"));
+if(!!!storedParticipants){
+    fetch('https://manage-interviews.herokuapp.com/get_participants')
+        .then(response => response.json())
+        .then(data => {
+            localStorage.setItem("all_participants", JSON.stringify(data.data));
+            jQuery(document).ready(function ($) {
+                var comboTree1, comboTree2;
+                comboTree1 = $('#justAnInputBox').comboTree({
+                    source: data.data,
+                    isMultiple: true,
+                    cascadeSelect: false,
+                    collapse: true,
+                    selectableLastNode: true,
+                });
             });
         });
+}
+else{
+    jQuery(document).ready(function ($) {
+        var comboTree1;
+        comboTree1 = $('#justAnInputBox').comboTree({
+            source: storedParticipants,
+            isMultiple: true,
+            cascadeSelect: false,
+            collapse: true,
+            selectableLastNode: true,
+        });
     });
+}
 
 
 // Function to schedule the interviews
@@ -87,5 +103,11 @@ function schedule(){
         
     })
 
+}
+
+
+function refresh_participants(){
+    localStorage.removeItem("all_participants");
+    location.reload();
 }
 
